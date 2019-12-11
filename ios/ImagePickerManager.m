@@ -47,10 +47,10 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         }
         NSString *cancelTitle = [self.options valueForKey:@"cancelButtonTitle"];
         NSString *takePhotoButtonTitle = [self.options valueForKey:@"takePhotoButtonTitle"];
-        NSString *chooseFromLibraryButtonTitle = [self.options valueForKey:@"chooseFromLibraryButtonTitle"];        
+        NSString *chooseFromLibraryButtonTitle = [self.options valueForKey:@"chooseFromLibraryButtonTitle"];
+
 
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-        alertController.view.tintColor = [RCTConvert UIColor:options[@"tintColor"]];
 
         UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:cancelTitle style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
             self.callback(@[@{@"didCancel": @YES}]); // Return callback for 'cancel' action (if is required)
@@ -204,18 +204,14 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         }];
     }
     else { // RNImagePickerTargetLibrarySingleImage
-        if ([[[UIDevice currentDevice] systemVersion] floatValue] < 11) {
-            [self checkPhotosPermissions:^(BOOL granted) {
-                if (!granted) {
-                    self.callback(@[@{@"error": @"Photo library permissions not granted"}]);
-                    return;
-                }
+        [self checkPhotosPermissions:^(BOOL granted) {
+            if (!granted) {
+                self.callback(@[@{@"error": @"Photo library permissions not granted"}]);
+                return;
+            }
 
-                showPickerViewController();
-            }];
-        } else {
-          showPickerViewController();
-        }
+            showPickerViewController();
+        }];
     }
 }
 
@@ -460,7 +456,7 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
 
                 if (videoURL) { // Protect against reported crash
                   NSError *error = nil;
-                  [fileManager moveItemAtURL:videoURL toURL:videoDestinationURL error:&error];
+                  [fileManager copyItemAtURL:videoURL toURL:videoDestinationURL error:&error];
                   if (error) {
                       self.callback(@[@{@"error": error.localizedFailureReason}]);
                       return;
